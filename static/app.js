@@ -23,10 +23,9 @@
   function renderClips(data) {
     resultsGrid.innerHTML = data.clips.map(function (clip, index) {
       return '<article class="clip-result">' +
-        '<div class="clip-preview"><span class="clip-preview-mark">▶</span>' +
-        '<span class="clip-number">CLIP ' + String(index + 1).padStart(2, "0") + '</span>' +
-        '<span class="clip-duration">' + escapeHtml(clip.duration) + 's</span></div>' +
-        '<div class="clip-details"><strong>' + escapeHtml(data.title) + ' · ' +
+        '<video class="clip-video" controls preload="metadata" playsinline src="' + escapeHtml(clip.preview_url) + '"></video>' +
+        '<div class="clip-details"><span class="clip-number-inline">CLIP ' + String(index + 1).padStart(2, "0") + '</span>' +
+        '<strong>' + escapeHtml(data.title) + ' · ' +
         escapeHtml(clip.start) + '–' + escapeHtml(clip.end) + '</strong>' +
         '<p>Portrait 9:16 · ' + escapeHtml(clip.size_mb) + ' MB</p>' +
         '<a class="download-link" href="' + escapeHtml(clip.url) + '">Download MP4 <span>↓</span></a>' +
