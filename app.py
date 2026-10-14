@@ -186,6 +186,7 @@ def process_clip_job(job_id, video_url, platform, count, clip_length):
                 raise RuntimeError("Clip rendering failed. " + (details or "Please try a different video."))
             clips.append({
                 "name": filename, "url": f"/clips/{job_id}/{filename}",
+                "preview_url": f"/preview/{job_id}/{filename}",
                 "start_seconds": start, "start": format_time(start),
                 "end": format_time(min(duration, start + actual_length)),
                 "duration": actual_length,
