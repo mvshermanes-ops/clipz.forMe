@@ -285,10 +285,6 @@ def download_clip(job_id, filename):
     return send_from_directory(directory, filename, as_attachment=True, download_name=filename)
 
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", "5000")))
-
-
 @app.get("/preview/<job_id>/<path:filename>")
 def preview_clip(job_id, filename):
     if not re.fullmatch(r"[A-Za-z0-9]{8,32}", job_id) or not re.fullmatch(r"clip-\d{2}\.mp4", filename):
@@ -297,3 +293,7 @@ def preview_clip(job_id, filename):
     if not (directory / filename).is_file():
         return jsonify(ok=False, error="This clip is no longer available. Create it again to preview."), 404
     return send_from_directory(directory, filename, as_attachment=False, mimetype="video/mp4")
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", "5000")))
