@@ -36,6 +36,18 @@
     results.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
+  async function pollJob(jobId) {
+    for (;;) {
+      await new Promise(function (resolve) { setTimeout(resolve, 2500); });
+      const response = await fetch("/api/jobs/" + encodeURIComponent(jobId));
+      const data = await response.json();
+      if (!response.ok || !data.ok) throw new Error(data.error || "Could not check job status.");
+      if (data.status === "error") throw new Error(data.error || data.message || "Clip creation failed.");
+      if (data.status === "done") return data;
+      showMessage(data.message || "Processing your clips…", "working");
+    }
+  }
+
   form.addEventListener("submit", async function (event) {
     event.preventDefault();
     const url = input.value.trim();
@@ -49,22 +61,20 @@
     message.hidden = true;
     results.hidden = true;
     resultsGrid.innerHTML = "";
-    showMessage("Connecting to the video and analysing its audio. This can take a few minutes—keep this tab open.", "working");
+    showMessage("Starting clip job… keep this tab open while your video is processed.", "working");
     try {
       const response = await fetch("/api/create-clips", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({url: url, count: Number(countSelect.value), clip_length: Number(lengthSelect.value)})
       });
-      const data = await response.json();
-      if (!response.ok || !data.ok) {
-        showMessage(data.error || "Couldn't create clips from that link.", "error");
-      } else {
-        showMessage(data.message, "success");
-        renderClips(data);
-      }
-    } catch (_) {
-      showMessage("The request was interrupted. The free server may have restarted or timed out. Try a shorter video.", "error");
+      const started = await response.json();
+      if (!response.ok || !started.ok) throw new Error(started.error || "Couldn't start clip creation.");
+      const data = await pollJob(started.job_id);
+      showMessage(data.message, "success");
+      renderClips(data);
+    } catch (error) {
+      showMessage(error.message || "The request was interrupted. Try a shorter public video.", "error");
     } finally {
       button.disabled = false;
       button.querySelector("span:first-child").textContent = "Create clips";
